@@ -1,47 +1,48 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <html>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+	integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="styles.css">
+
 <title>МЕТАПРОГ.ОНЛАЙН</title>
+
 <header>
 	<h1>
-		Web клиент Метапрог.Онлайн
+		<strong style="margin:0;padding:0">
+			МЕТАПРОГ.ОНЛАЙН Web
+		</strong>
 	</h1>
 </header>
 
 <body>
 	<div id="loginForm">
 		Введите данные своей учетной записи ВКонтакте для входа:
-		<br>
-		<input id="login" , placeholder="Номер телефона или логин">
-		<br>
-		<input id="pass" type="password" placeholder="Пароль">
-		<br>
-		<button onclick="doLogin()">Отправить</button>
+		<input class="form-control" id="login" , placeholder="Номер телефона или логин">
+		<input class="form-control" id="pass" type="password" placeholder="Пароль">
+		<button class="btn btn-primary" onclick="doLogin()">Отправить</button>
 	</div>
 	<footer>
-		Version 0.1.0 by AnImEsHnIk2281337
+		Version 0.2.0 by AnImEsHnIk2281337
 	</footer>
 	<div id="chat" hidden="true">
-		<input id="mesText"></input>
-		<button onclick="message()" id="send">Отправить</button>
-		<br>
+		<input style="display:inline-block" class="form-control" id="mesText"></input>
+		<button onclick="message()" id="send" class="btn btn-primary">Отправить</button>
 		<div id="messages" style="overflow-y:auto;height:70%">
-			<div>
-
-			</div>
 </body>
 
 
 <script>
-	let socket;
+	let socket, username;
 	if (window.location.href.includes('https://')) {
 		socket = new WebSocket('wss://' + location.host + '/ws');
 	} else {
 		socket = new WebSocket('ws://' + location.host + '/ws');
 	}
-	let login, password;
 	const doLogin = async () => {
-		let rq = JSON.stringify({ "method": "login", "params": { "login": document.getElementById('login').value, "password": document.getElementById('pass').value } });
+		username = document.getElementById('login').value;
+		let rq = JSON.stringify({ "method": "login", "params": { "login": username, "password": document.getElementById('pass').value } });
 		socket.send(rq);
 		socket.onmessage = function (event) {
 			let res = JSON.parse(event.data);
@@ -49,8 +50,6 @@
 
 			if (res) {
 				alert('ты вошол');
-				login = document.getElementById('login').value;
-				password = document.getElementById('pass').value;
 				document.getElementById('loginForm').hidden = true;
 				document.getElementById('chat').hidden = false;
 				document.getElementById('mesText').addEventListener("keyup", function (event) {
@@ -60,26 +59,24 @@
 						document.getElementById("send").click();
 					}
 				});
+				socket.send(JSON.stringify({ "method": "messages", "params": {} }));
 				socket.onmessage = chat;
-				getMessages();
-			} else alert('неверный пASSворд');
+			} else alert('неверный пASSворд или иди в жопу с таким паролем (делай от 6 символов)');
 		}
 	}
 	const message = async () => {
-		let rq = JSON.stringify({ "method": "message", "params": { "login": login, "password": password, "text": document.getElementById('mesText').value } });
+		let rq = JSON.stringify({ "method": "message", "params": { "text": document.getElementById('mesText').value, "login": username } });
 		socket.send(rq);
 		document.getElementById('mesText').value = '';
 	}
 	const chat = (event) => {
 		let res = JSON.parse(event.data);
-		res = res['result'];
-
-		document.getElementById('messages').innerHTML = res.join('<br>');
-	}
-	const getMessages = async () => {
-		while (true) {
-			await new Promise(resolve => setTimeout(resolve, 500))
-			socket.send(JSON.stringify({ "method": "messages", "params": {} }));
+		if (Object.keys(res).includes('message')) {
+			document.getElementById('messages').innerHTML += (res['message']);
+		} else if (Object.keys(res).includes('result')) {
+			if (res['result']) {
+				document.getElementById('messages').innerHTML = res['result'].join('');
+			}
 		}
 	}
 </script>

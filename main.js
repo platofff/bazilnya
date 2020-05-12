@@ -2,39 +2,52 @@
 const express = require('express');
 const expressws = require('express-ws');
 const app = express();
+const showdown  = require('showdown');
 
-expressws(app);
-app.use(express.static('chat'));
+let converter = new showdown.Converter()
+let wss = expressws(app);
+app.use('/', express.static('chat'));
 
 let users = {};
+let sessions = {};
 let messages = [];
 
 const controller = {
-	login(params) {
+	login(params, req) {
 		let username = params['login'];
 		let password = params['password'];
-		if (!Object.keys(users).includes(username)) {
+		let addr = req.connection.remoteAddress
+		if (!Object.keys(users).includes(username) && username && password.length > 5) {
 			users[username] = password;
+			sessions[username] = req.connection;
+			console.log('New registration from ' + addr + ' Username: ' + username);
 			return true;
 		} else if (users[username] === password) {
+			sessions[username] = req.connection;
+			console.log(username + ' : successful login from ' + addr);
 			return true;
 		} else {
+			console.log('Invalid login from ' + addr);
 			return false;
 		}
 	},
-	message(params) {
-		let username = params['login'];
-		let password = params['password'];
+	message(params, req) {
 		let text = params['text'];
-		if (Object.keys(users).includes(username) && users[username] === password && text) {
-			messages.push('<b>' + username + '</b>  базарит: ' + text);
+		let username = params['login'];
+		let session = req.connection;
+		if (sessions[username] === session) {
+			messages.push('<span class="message"><b>' + username + '</b>  базарит: ' + converter.makeHtml(text) + "</span>");
 			if (messages.length > 50) {
 				messages.shift();
 			}
+			chatWss.clients.forEach(function (client) {
+				client.send(JSON.stringify({ "message": messages[messages.length - 1] }));
+			});
+		} else {
+			console.log('Unauthorized message attempt from ' + session.remoteAddress);
 		}
-		return messages;
 	},
-	messages(params) {
+	messages() {
 		return messages;
 	}
 }
@@ -43,12 +56,13 @@ app.ws('/ws', (ws, req) => {
 	ws.on('message', rq => {
 		try {
 			rq = JSON.parse(rq);
-			ws.send(JSON.stringify({ "result": controller[rq.method](rq.params) }));
+			ws.send(JSON.stringify({ "result": controller[rq.method](rq.params, req) }));
 		} catch (err) {
 			console.log(err);
 			ws.send(JSON.stringify({ 'result': false }));
 		}
 	})
 });
+let chatWss = wss.getWss('/ws');
 
 app.listen(80, () => console.log('app listening on port 80'))
