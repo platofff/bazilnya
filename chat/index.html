@@ -6,30 +6,39 @@
 	integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 <link rel="stylesheet" type="text/css" href="styles.css">
 
-<title>МЕТАПРОГ.ОНЛАЙН</title>
+<title>чятик на вебсокетс))0)</title>
 
 <header>
 	<h1>
 		<strong style="margin:0;padding:0">
-			МЕТАПРОГ.ОНЛАЙН Web
+			чятик на вебсокетс))0)
 		</strong>
 	</h1>
 </header>
 
 <body>
-	<div id="loginForm">
-		Введите данные своей учетной записи ВКонтакте для входа:
-		<input class="form-control" id="login" , placeholder="Номер телефона или логин">
-		<input class="form-control" id="pass" type="password" placeholder="Пароль">
-		<button class="btn btn-primary" onclick="doLogin()">Отправить</button>
+	<div id="login-form">
+		У нас катит markdown. Рега/вход:
+		<p>
+		    <input class="form-control" id="login" , placeholder="Номер телефона или логин">
+		</p>
+		<p>
+		    <input class="form-control" id="pass" type="password" placeholder="Пароль">
+		</p>
+		<p>
+		    <button class="btn btn-primary" onclick="doLogin()">Отправить</button>
+        </p>
 	</div>
 	<footer>
-		Version 0.2.0 by AnImEsHnIk2281337
+		Version 0.3.0 by AnImEsHnIk2281337
 	</footer>
 	<div id="chat" hidden="true">
-		<input style="display:inline-block" class="form-control" id="mesText"></input>
-		<button onclick="message()" id="send" class="btn btn-primary">Отправить</button>
-		<div id="messages" style="overflow-y:auto;height:70%">
+	    <div id="msg-panel">
+		    <input style="display:inline-block" class="form-control" id="mesText"></input>
+		    <button onclick="message()" id="send" class="btn btn-primary">Отправить</button>
+		</div>
+		<div id="messages"></div>
+	</div>
 </body>
 
 
@@ -44,16 +53,15 @@
 		username = document.getElementById('login').value;
 		let rq = JSON.stringify({ "method": "login", "params": { "login": username, "password": document.getElementById('pass').value } });
 		socket.send(rq);
-		socket.onmessage = function (event) {
+		socket.onmessage = (event) => {
 			let res = JSON.parse(event.data);
 			res = res['result'];
 
 			if (res) {
 				alert('ты вошол');
-				document.getElementById('loginForm').hidden = true;
+				document.getElementById('login-form').hidden = true;
 				document.getElementById('chat').hidden = false;
-				document.getElementById('mesText').addEventListener("keyup", function (event) {
-
+				document.getElementById('mesText').addEventListener("keyup", (event) => {
 					if (event.keyCode === 13) {
 						event.preventDefault();
 						document.getElementById("send").click();
@@ -72,7 +80,8 @@
 	const chat = (event) => {
 		let res = JSON.parse(event.data);
 		if (Object.keys(res).includes('message')) {
-			document.getElementById('messages').innerHTML += (res['message']);
+			document.getElementById('messages').innerHTML += res['message'];
+			window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
 		} else if (Object.keys(res).includes('result')) {
 			if (res['result']) {
 				document.getElementById('messages').innerHTML = res['result'].join('');

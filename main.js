@@ -36,7 +36,7 @@ const controller = {
 		let username = params['login'];
 		let session = req.connection;
 		if (sessions[username] === session) {
-			messages.push('<span class="message"><b>' + username + '</b>  базарит: ' + converter.makeHtml(text) + "</span>");
+			messages.push('<div class="message"><b>' + username + '</b>  базарит: ' + converter.makeHtml(text) + "</div>");
 			if (messages.length > 50) {
 				messages.shift();
 			}
