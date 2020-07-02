@@ -20,7 +20,7 @@
 	<div id="login-form">
 		У нас катит markdown. Рега/вход:
 		<p>
-		    <input class="form-control" id="login" , placeholder="Номер телефона или логин">
+		    <input class="form-control" id="login" , placeholder="Погоняло">
 		</p>
 		<p>
 		    <input class="form-control" id="pass" type="password" placeholder="Пароль">
@@ -30,7 +30,7 @@
         </p>
 	</div>
 	<footer>
-		Version 0.3.0 by AnImEsHnIk2281337
+		Version 0.3.1 by AnImEsHnIk2281337
 	</footer>
 	<div id="chat" hidden="true">
 	    <div id="msg-panel">
@@ -43,12 +43,23 @@
 
 
 <script>
-	let socket, username;
-	if (window.location.href.includes('https://')) {
-		socket = new WebSocket('wss://' + location.host + '/ws');
-	} else {
-		socket = new WebSocket('ws://' + location.host + '/ws');
+	let socket, username, connect;
+	let mesText = document.getElementById('mesText');
+	connect = () => {
+	    if (window.location.href.includes('https://')) {
+		    socket = new WebSocket('wss://' + location.host + '/ws');
+	    } else {
+		    socket = new WebSocket('ws://' + location.host + '/ws');
+	    }
+	    socket.onclose = () => {
+            connect();
+        }
+        socket.onerror = (err) => {
+            console.log(err);
+            socket.close();
+        }
 	}
+	connect();
 	const doLogin = async () => {
 		username = document.getElementById('login').value;
 		let rq = JSON.stringify({ "method": "login", "params": { "login": username, "password": document.getElementById('pass').value } });
@@ -58,7 +69,7 @@
 			res = res['result'];
 
 			if (res) {
-				alert('ты вошол');
+				alert('welcum to the club buddy');
 				document.getElementById('login-form').hidden = true;
 				document.getElementById('chat').hidden = false;
 				document.getElementById('mesText').addEventListener("keyup", (event) => {
@@ -73,9 +84,11 @@
 		}
 	}
 	const message = async () => {
-		let rq = JSON.stringify({ "method": "message", "params": { "text": document.getElementById('mesText').value, "login": username } });
-		socket.send(rq);
-		document.getElementById('mesText').value = '';
+	    if (mesText.value) {
+		    let rq = JSON.stringify({ "method": "message", "params": { "text": mesText.value, "login": username } });
+		    socket.send(rq);
+		    mesText.value = '';
+		}
 	}
 	const chat = (event) => {
 		let res = JSON.parse(event.data);
