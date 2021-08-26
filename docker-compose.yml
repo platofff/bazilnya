@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  popit:
+    build: .
+    volumes:
+    - /etc/letsencrypt:/home/app/ssl:ro
+    - chat-config:/home/app/config
+    environment:
+      NODE_ENV: production
+      SSL_PRIV: /home/app/ssl/live/chat.based.su/privkey.pem
+      SSL_PUB: /home/app/ssl/live/chat.based.su/fullchain.pem
+    ports:
+    - "2096:3000/tcp"
+    restart: always
+
+volumes:
+  chat-config:
