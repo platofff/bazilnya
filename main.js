@@ -20,7 +20,7 @@ fsExtra.emptyDirSync('chat/uploads');
 	const converter = new showdown.Converter();
 
 	if (process.env.SSL_PRIV && process.env.SSL_PUB) {
-		const keys = await Promise.all([fs.readFile(process.env.SSL_PRIV), fs.readFile(process.env.SSL_PUB)]);
+		const keys = await Promise.all([fs.promises.readFile(process.env.SSL_PRIV), fs.promises.readFile(process.env.SSL_PUB)]);
 		server = require('https').createServer({
 			key: keys[0],
 			cert: keys[1]
@@ -35,7 +35,7 @@ fsExtra.emptyDirSync('chat/uploads');
 			throw e
 		else {
 			SALT = Math.random().toString(36).substring(5);
-			fs.writeFile('config/salt', SALT, 'utf8');
+			fs.promises.writeFile('config/salt', SALT);
 		}
 	}
 

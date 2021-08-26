@@ -1,8 +1,5 @@
-FROM node:14-alpine
-ADD . /home/app
-WORKDIR /home/app
+FROM node:16-bullseye
+ADD . /root
+WORKDIR /root
 RUN npm install
-RUN addgroup -S app --gid 1002 &&\
- adduser -S app -G app
-USER app
 ENTRYPOINT ["./main.js"]
