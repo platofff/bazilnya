@@ -18,6 +18,7 @@ fsExtra.emptyDirSync('chat/uploads');
 	let messages = [];
 	const MAX_MESSAGES = process.env.MAX_MESSAGES || 50;
 	const MAX_LENGTH = process.env.MAX_LENGTH || 1024;
+	const MAX_SIZE = process.env.MAX_SIZE || 1024 * 1024 * 1;
 	const converter = new showdown.Converter();
 
 	if (process.env.SSL_PRIV && process.env.SSL_PUB) {
@@ -40,7 +41,7 @@ fsExtra.emptyDirSync('chat/uploads');
 		}
 	}
 
-	const upload = multer({ dest: '/tmp/simple-chat', limits: {fileSize: '10mb'} });
+	const upload = multer({ dest: '/tmp/simple-chat', limits: {fileSize: MAX_SIZE} });
 	const wss = expressws(app, server);
 	app.use('/', express.static('chat'));
 

@@ -186,9 +186,16 @@ const attachFiles = async (files) => {
     if (mesText.value !== '')
       mesText.value += '<br>';
     const res = await fetch('/upload', { method: "POST", body: formData });
+    if (!res.ok) {
+      alert('твоя картинка слишком большая...');
+      fill.style.display = 'none';
+      mesText.focus();
+      return;
+    }
     mesText.value += `![](${await res.text()})<br> `;
     fill.style.display = 'none';
     mesText.focus();
+    return;
   } else {
     alert('хей, дружок-пирожок, ты кажется выбрал неправильный файл, поддерживаются только картинки');
   }
