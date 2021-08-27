@@ -8,7 +8,7 @@ const loginBtn = document.getElementById('login-btn');
 const loginForm = document.getElementById('login-form');
 const chatElem = document.getElementById('chat');
 const currentUser = document.getElementById('user');
-const sendBtn = document.getElementById("send");
+const sendBtn = document.getElementById('send');
 const messages = document.getElementById('messages');
 const fileInput = document.getElementById('file-input');
 const processLabel = document.getElementById('process');
@@ -52,8 +52,23 @@ const deleteCookie = (name) => {
     'max-age': -1,
     SameSite: 'Strict',
     Secure: true
-  })
+  });
 }
+
+document.body.addEventListener('dragover', (event) => event.preventDefault());
+document.body.addEventListener('drop', (event) => {
+  event.preventDefault();
+  const url = event.dataTransfer.getData('text');
+  if (url === '') {
+    if (event.dataTransfer.files[0] === undefined)
+      return;
+    attachFiles(event.dataTransfer.files);
+  } else {
+    if (mesText.value !== '')
+      mesText.value += '<br>';
+    mesText.value += `![](${url})<br>`;
+  }
+});
 
 passwordInput.addEventListener('keyup', (event) => {
   if (event.key === 'Enter') {

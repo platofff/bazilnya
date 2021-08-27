@@ -118,6 +118,8 @@ fsExtra.emptyDirSync('chat/uploads');
 			let text = params['text'];
 			let username = params['login'];
 			let session = req.connection;
+			if (text.includes('(((') && text.includes(')))'))
+				text = text.replace('(((', `<span style="font-family:'DS Sholom Medium';color:blue">(((`).replace(')))', ')))</span>')
 			if (sessions[username] === session) {
 				messages.push(`<div class="message"><b>${username}</b>${converter.makeHtml(text)}</div>`);
 				if (messages.length > MAX_MESSAGES)
