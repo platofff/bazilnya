@@ -1,4 +1,7 @@
-@import url(https://allfont.ru/allfont.css?fonts=ds-sholom-medium);
+@font-face {
+    font-family: 'DS Sholom Medium';
+    src: url(DS_Sholom_Medium.ttf);
+}
 
 #back, #back-color {
     position: fixed;
