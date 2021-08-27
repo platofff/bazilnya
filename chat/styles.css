@@ -2,6 +2,10 @@
     font-family: 'DS Sholom Medium';
     src: url(DS_Sholom_Medium.ttf);
 }
+@font-face {
+    font-family: 'Apostol';
+    src: url(Apostol.ttf);
+}
 
 #back, #back-color {
     position: fixed;
@@ -150,4 +154,14 @@ header {
     -webkit-backdrop-filter: blur(0.5rem);
     backdrop-filter: blur(0.5rem);
     background-color: rgba(50, 50, 150, 0.4);
+}
+
+#to-bottom-btn {
+    position: fixed;
+    bottom: 3em;
+    right: 1em;
+    transform: rotate(90deg);
+    color: white;
+    z-index: 2;
+    display: none;
 }

@@ -1,5 +1,5 @@
 'use strict';
-let socket, username, connect;
+let socket, username, connect, images;
 const mesText = document.getElementById('mes-text');
 const fill = document.getElementById('fill');
 const loginInput = document.getElementById('login');
@@ -13,6 +13,15 @@ const messages = document.getElementById('messages');
 const fileInput = document.getElementById('file-input');
 const processLabel = document.getElementById('process');
 const header = document.getElementById('header');
+const toBottomBtn = document.getElementById('to-bottom-btn');
+
+const scrollHandler = () => {
+  if (window.scrollY + 10 >= (document.documentElement.scrollHeight - document.documentElement.clientHeight))
+    toBottomBtn.style.display = 'none';
+  else
+    toBottomBtn.style.display = 'block';
+}
+window.addEventListener('scroll', scrollHandler);
 
 const initialHeaderHeight = header.getBoundingClientRect().height;
 chatElem.style.marginTop = initialHeaderHeight + 'px';
@@ -137,14 +146,32 @@ const message = async () => {
   }
 }
 
+const addMessage = (html) => {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  div.classList.add('message');
+  messages.appendChild(div);
+}
+
 const chat = (event) => {
   let res = JSON.parse(event.data);
   if (Object.keys(res).includes('message')) {
-    messages.innerHTML += res['message'];
-    window.scrollTo(0, messages.scrollHeight);
+    addMessage(res.message);
+    scrollHandler();
   } else if (Object.keys(res).includes('result')) {
-    if (res['result']) {
-      messages.innerHTML = res['result'].join('');
+    if (res.result) {
+      for (const mes of res.result)
+        addMessage(mes);
+      images = document.getElementsByTagName('img');
+      const onloadHandler = () => {
+        if (onloadHandler.i === undefined)
+          onloadHandler.i = 0;
+        onloadHandler.i++;
+        if (onloadHandler.i == images.length)
+          window.scrollTo(0, document.body.clientHeight);
+      }
+      for (const img of images)
+        img.onload = onloadHandler;
     }
   }
 }

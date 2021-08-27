@@ -17,6 +17,7 @@ fsExtra.emptyDirSync('chat/uploads');
 	let sessions = {};
 	let messages = [];
 	const MAX_MESSAGES = process.env.MAX_MESSAGES || 50;
+	const MAX_LENGTH = process.env.MAX_LENGTH || 1024;
 	const converter = new showdown.Converter();
 
 	if (process.env.SSL_PRIV && process.env.SSL_PUB) {
@@ -39,7 +40,7 @@ fsExtra.emptyDirSync('chat/uploads');
 		}
 	}
 
-	const upload = multer({ dest: '/tmp/simple-chat' });
+	const upload = multer({ dest: '/tmp/simple-chat', limits: {fileSize: '10mb'} });
 	const wss = expressws(app, server);
 	app.use('/', express.static('chat'));
 
@@ -54,6 +55,28 @@ fsExtra.emptyDirSync('chat/uploads');
 			await fs.promises.unlink(`chat${path}`);
 	}
 
+	const based = (text) => {
+		const basedWords = ['сьлржалсч', 'баз', 'максымардыш', 'пыздыр', 'пыж'];
+		if (text.includes('(((') && text.includes(')))'))
+			text = text.replace('(((', `<span style="font-family:'DS Sholom Medium';color:blue">(((`).replace(')))', ')))</span>');
+		let result = '';
+		for (const word of text.split(' ')) {
+			let based = false;
+			for (const basedWord of basedWords) {
+				if (word.toLowerCase().startsWith(basedWord)) {
+					based = true;
+					break;
+				}
+			}
+			if (based) {
+				result += ` <span style="font-family:Apostol;font-size:x-large">${word}</span>`
+			} else {
+				result += ` ${word}`
+			}
+		}
+		return result.substr(1);
+	}
+
 	app.post('/upload', upload.single('file'), async (req, res) => {
 		let buf;
 		try {
@@ -62,7 +85,7 @@ fsExtra.emptyDirSync('chat/uploads');
 				.webp()
 				.toBuffer();
 		} catch (_) {
-			res.send('error');
+			res.send('Invalid image');
 			return null;
 		}
 		const unlinkPromise = fs.promises.unlink(req.file.path);
@@ -115,13 +138,12 @@ fsExtra.emptyDirSync('chat/uploads');
 			}
 		},
 		message(params, req) {
-			let text = params['text'];
-			let username = params['login'];
 			let session = req.connection;
-			if (text.includes('(((') && text.includes(')))'))
-				text = text.replace('(((', `<span style="font-family:'DS Sholom Medium';color:blue">(((`).replace(')))', ')))</span>')
-			if (sessions[username] === session) {
-				messages.push(`<div class="message"><b>${username}</b>${converter.makeHtml(text)}</div>`);
+			if (params.text.length > MAX_LENGTH)
+				throw new Error("Message's too long");
+			params.text = based(params.text);
+			if (sessions[params.login] === session) {
+				messages.push(`<b>${params.login}</b>${converter.makeHtml(params.text)}`);
 				if (messages.length > MAX_MESSAGES)
 					rmOldPics(messages.shift());
 				chatWss.clients.forEach((client) => {
@@ -142,7 +164,7 @@ fsExtra.emptyDirSync('chat/uploads');
 				rq = JSON.parse(rq);
 				ws.send(JSON.stringify({ "result": controller[rq.method](rq.params, req) }));
 			} catch (err) {
-				console.log(err);
+				console.error(err);
 				ws.send(JSON.stringify({ 'result': false }));
 			}
 		})
