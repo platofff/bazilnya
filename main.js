@@ -10,6 +10,7 @@ const { hash } = require('blake3');
 const showdown = require('showdown');
 
 const app = express();
+
 (async () => {
 	let server, SALT;
 	let users = {};
@@ -64,13 +65,13 @@ const app = express();
 		if (text.includes('(((') && text.includes(')))'))
 			text = text.replace('(((', `<span style="font-family:'DS Sholom Medium';color:blue">(((`).replace(')))', ')))</span>');
 		let result = '';
-		let based = false;
+		let _based = false;
 		let superBased = false;
 		let hyperBased = false;
 		for (const word of text.split(' ')) {
 			for (const basedWord of basedWords) {
 				if (word.toLowerCase().startsWith(basedWord)) {
-					based = true;
+					_based = true;
 					break;
 				}
 			}
@@ -88,7 +89,7 @@ const app = express();
 			}
 			if (hyperBased)
 				result += ` <span style="font-family:Runic;font-size:xx-large">${word}</span>`;
-			else if (based)
+			else if (_based)
 				result += ` <span style="font-family:Apostol;font-size:x-large">${word}</span>`;
 			else if (superBased)
 				result += ` <span style="font-family:'Deutsch Gothic'">${word}</span>`;
@@ -135,7 +136,7 @@ const app = express();
 				}
 			}
 			if (unic)
-				await fs.promises.unlink('chat' + matched[0].split('"')[1])
+				await fs.promises.unlink('chat' + matched[0].split('"')[1]);
 		}
 	}
 

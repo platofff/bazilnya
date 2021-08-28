@@ -15,7 +15,14 @@ const processLabel = document.getElementById('process');
 const header = document.getElementById('header');
 const toBottomBtn = document.getElementById('to-bottom-btn');
 
+const scrollHandler = () => {
+  if (window.innerHeight + window.scrollY + 100 >= document.documentElement.offsetHeight)
+    toBottomBtn.style.display = 'none';
+  else
+    toBottomBtn.style.display = 'block';
+}
 window.addEventListener('scroll', scrollHandler);
+
 
 const initialHeaderHeight = header.getBoundingClientRect().height;
 chatElem.style.marginTop = initialHeaderHeight + 'px';
