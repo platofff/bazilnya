@@ -6,6 +6,14 @@
     font-family: 'Apostol';
     src: url(Apostol.ttf);
 }
+@font-face {
+    font-family: 'Deutsch Gothic';
+    src: url(Deutsch_Gothic.ttf);
+}
+@font-face {
+    font-family: 'Runic';
+    src: url(Runic.ttf);
+}
 
 #back, #back-color {
     position: fixed;

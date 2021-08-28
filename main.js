@@ -7,10 +7,9 @@ const multer = require('multer');
 const fs = require('fs');
 const fsExtra = require('fs-extra')
 const { hash } = require('blake3');
-const app = express();
 const showdown = require('showdown');
 
-fsExtra.emptyDirSync('chat/uploads');
+const app = express();
 (async () => {
 	let server, SALT;
 	let users = {};
@@ -20,6 +19,8 @@ fsExtra.emptyDirSync('chat/uploads');
 	const MAX_LENGTH = process.env.MAX_LENGTH || 1024;
 	const MAX_SIZE = process.env.MAX_SIZE || 1024 * 1024 * 10;
 	const converter = new showdown.Converter();
+
+	fsExtra.emptyDirSync('chat/uploads');
 
 	if (process.env.SSL_PRIV && process.env.SSL_PUB) {
 		const keys = await Promise.all([fs.promises.readFile(process.env.SSL_PRIV), fs.promises.readFile(process.env.SSL_PUB)]);
@@ -57,23 +58,42 @@ fsExtra.emptyDirSync('chat/uploads');
 	}
 
 	const based = (text) => {
-		const basedWords = ['сьлржалсч', 'баз', 'максымардыш', 'пыздыр', 'пыж'];
+		const basedWords = ['сьлржалсч', 'баз', 'максымардыш', 'пыздыр', 'пыж', 'base', 'славян', 'добротрах', 'еблуци'];
+		const superBasedWords = ['нац', 'гитлер', 'австр', 'немец', 'художник', 'герман'];
+		const hyperBasedWords = ['гиперборе', 'глубинн', 'пятибрат', 'веды', 'арии', 'арий', 'славяноари', 'славяно-ари'];
 		if (text.includes('(((') && text.includes(')))'))
 			text = text.replace('(((', `<span style="font-family:'DS Sholom Medium';color:blue">(((`).replace(')))', ')))</span>');
 		let result = '';
+		let based = false;
+		let superBased = false;
+		let hyperBased = false;
 		for (const word of text.split(' ')) {
-			let based = false;
 			for (const basedWord of basedWords) {
 				if (word.toLowerCase().startsWith(basedWord)) {
 					based = true;
 					break;
 				}
 			}
-			if (based) {
-				result += ` <span style="font-family:Apostol;font-size:x-large">${word}</span>`
-			} else {
-				result += ` ${word}`
+			for (const superBasedWord of superBasedWords) {
+				if (word.toLowerCase().startsWith(superBasedWord)) {
+					superBased = true;
+					break;
+				}
 			}
+			for (const hyperBasedWord of hyperBasedWords) {
+				if (word.toLowerCase().startsWith(hyperBasedWord)) {
+					hyperBased = true;
+					break;
+				}
+			}
+			if (hyperBased)
+				result += ` <span style="font-family:Runic;font-size:xx-large">${word}</span>`;
+			else if (based)
+				result += ` <span style="font-family:Apostol;font-size:x-large">${word}</span>`;
+			else if (superBased)
+				result += ` <span style="font-family:'Deutsch Gothic'">${word}</span>`;
+			else
+				result += ` ${word}`;
 		}
 		return result.substr(1);
 	}
@@ -144,7 +164,7 @@ fsExtra.emptyDirSync('chat/uploads');
 				throw new Error("Message's too long");
 			params.text = based(params.text);
 			if (sessions[params.login] === session) {
-				messages.push(`<b>${params.login}</b>${converter.makeHtml(params.text)}`);
+				messages.push(`<b class="author">${params.login}</b>${converter.makeHtml(params.text)}`);
 				if (messages.length > MAX_MESSAGES)
 					rmOldPics(messages.shift());
 				chatWss.clients.forEach((client) => {

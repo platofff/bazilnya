@@ -15,12 +15,6 @@ const processLabel = document.getElementById('process');
 const header = document.getElementById('header');
 const toBottomBtn = document.getElementById('to-bottom-btn');
 
-const scrollHandler = () => {
-  if (window.scrollY + 10 >= (document.documentElement.scrollHeight - document.documentElement.clientHeight))
-    toBottomBtn.style.display = 'none';
-  else
-    toBottomBtn.style.display = 'block';
-}
 window.addEventListener('scroll', scrollHandler);
 
 const initialHeaderHeight = header.getBoundingClientRect().height;
@@ -151,15 +145,17 @@ const addMessage = (html) => {
   div.innerHTML = html;
   div.classList.add('message');
   messages.appendChild(div);
+  if (div.getElementsByClassName('author')[0].innerText === username)
+    window.scrollTo({top: document.body.clientHeight, behavior: 'smooth'});
 }
 
 const chat = (event) => {
   let res = JSON.parse(event.data);
   if (Object.keys(res).includes('message')) {
     addMessage(res.message);
-    scrollHandler();
   } else if (Object.keys(res).includes('result')) {
     if (res.result) {
+      messages.innerHTML = '';
       for (const mes of res.result)
         addMessage(mes);
       images = document.getElementsByTagName('img');
@@ -168,7 +164,7 @@ const chat = (event) => {
           onloadHandler.i = 0;
         onloadHandler.i++;
         if (onloadHandler.i == images.length)
-          window.scrollTo(0, document.body.clientHeight);
+          window.scrollTo({top: document.body.clientHeight, behavior: 'smooth'});
       }
       for (const img of images)
         img.onload = onloadHandler;
