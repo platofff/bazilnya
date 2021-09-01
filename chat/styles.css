@@ -173,3 +173,8 @@ header {
     z-index: 2;
     display: none;
 }
+
+strong {
+    font-family: Apostol;
+    font-size: larger;
+}

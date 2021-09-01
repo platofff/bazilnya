@@ -61,7 +61,7 @@ const app = express();
 	const based = (text) => {
 		const basedWords = ['сьлржалсч', 'баз', 'максымардыш', 'пыздыр', 'пыж', 'base', 'славян', 'добротрах', 'еблуци'];
 		const superBasedWords = ['нац', 'гитлер', 'австр', 'немец', 'художник', 'герман'];
-		const hyperBasedWords = ['гиперборе', 'глубинн', 'пятибрат', 'веды', 'арии', 'арий', 'славяноари', 'славяно-ари'];
+		const hyperBasedWords = ['гиперборе', 'глубинн', 'пятибрат', 'веды', 'арии', 'арий', 'славяноари', 'славяно-ари', 'пчс'];
 		if (text.includes('(((') && text.includes(')))'))
 			text = text.replace('(((', `<span style="font-family:'DS Sholom Medium';color:blue">(((`).replace(')))', ')))</span>');
 		let result = '';
