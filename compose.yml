@@ -1,0 +1,13 @@
+services:
+  bazilnya:
+    build: .
+    volumes:
+    - chat-config:/home/app/config
+    environment:
+      NODE_ENV: production
+    ports:
+    - "3000:3000/tcp"
+    restart: always
+
+volumes:
+  chat-config:
